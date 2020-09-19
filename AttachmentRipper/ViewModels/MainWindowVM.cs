@@ -52,7 +52,7 @@ namespace AttachmentRipper.ViewModels
 				return;
             }
 			Regex EmailRegex = new Regex("^.*msg$");
-			Regex ExcelRegex = new Regex("^.*pdf$");
+			Regex ExcelRegex = new Regex("^.*xlsx$");
 			foreach (string MessagePath in Directory.GetFiles(SourceDirectory).Where(x => EmailRegex.IsMatch(x)))
 			{
 				var Message = new Storage.Message(MessagePath);
