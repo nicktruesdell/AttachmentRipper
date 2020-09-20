@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight;
+﻿using ClosedXML.Excel;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using MsgReader.Outlook;
 using System;
@@ -34,8 +35,8 @@ namespace AttachmentRipper.ViewModels
             set => Set(ref _destDirectory, value);
         }
 
-        public ICommand OKCommand => _okCommand ??= new RelayCommand(() =>
-        {
+		public ICommand OKCommand => _okCommand ??= new RelayCommand(() =>
+		{
 			if (string.IsNullOrEmpty(SourceDirectory))
 			{
 				MessageBox.Show("Source directory must be specified.");
@@ -47,10 +48,10 @@ namespace AttachmentRipper.ViewModels
 				return;
 			}
 			if (Directory.GetFiles(DestDirectory).Any())
-            {
+			{
 				MessageBox.Show("Destination directory must be empty.");
 				return;
-            }
+			}
 			Regex EmailRegex = new Regex("^.*msg$");
 			Regex ExcelRegex = new Regex("^.*xlsx$");
 			foreach (string MessagePath in Directory.GetFiles(SourceDirectory).Where(x => EmailRegex.IsMatch(x)))
@@ -63,9 +64,17 @@ namespace AttachmentRipper.ViewModels
 						var TypedAttachment = Attachment as Storage.Attachment;
 						if (ExcelRegex.IsMatch(TypedAttachment.FileName))
 						{
-							using (FileStream fs = File.Create(GetUniqueFileName(TypedAttachment.FileName)))
+							using (MemoryStream ms = new MemoryStream(TypedAttachment.Data))
 							{
-								fs.Write(TypedAttachment.Data, 0, TypedAttachment.Data.Length);
+								using (XLWorkbook workbook = new XLWorkbook(ms))
+								{
+									workbook.Worksheets.Delete("Report Details");
+									workbook.SaveAs(GetUniqueFileName(TypedAttachment.FileName));
+								}
+								//using (FileStream fs = File.Create(GetUniqueFileName(TypedAttachment.FileName)))
+								//{
+								//    fs.Write(TypedAttachment.Data, 0, TypedAttachment.Data.Length);
+								//}
 							}
 						}
 					}
@@ -94,7 +103,7 @@ namespace AttachmentRipper.ViewModels
                 }
 				return NameWithCount;
             }
-        }
+        }		
         #endregion
     }
 }
