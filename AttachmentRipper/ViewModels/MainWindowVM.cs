@@ -56,23 +56,25 @@ namespace AttachmentRipper.ViewModels
 			Regex ExcelRegex = new Regex("^.*(xls[xm])$");
 			foreach (string MessagePath in Directory.GetFiles(SourceDirectory).Where(x => EmailRegex.IsMatch(x)))
 			{
-				var Message = new Storage.Message(MessagePath);
-				foreach (var Attachment in Message.Attachments)
+				using (Storage.Message Message = new Storage.Message(MessagePath))
 				{
-					if (Attachment is Storage.Attachment)
+					foreach (var Attachment in Message.Attachments)
 					{
-						var TypedAttachment = Attachment as Storage.Attachment;
-						if (ExcelRegex.IsMatch(TypedAttachment.FileName))
+						if (Attachment is Storage.Attachment)
 						{
-							using (MemoryStream ms = new MemoryStream(TypedAttachment.Data))
+							var TypedAttachment = Attachment as Storage.Attachment;
+							if (ExcelRegex.IsMatch(TypedAttachment.FileName))
 							{
-								using (XLWorkbook workbook = new XLWorkbook(ms))
+								using (MemoryStream ms = new MemoryStream(TypedAttachment.Data))
 								{
-									if (workbook.Worksheets.Any(sheet => sheet.Name == "Report Details"))
+									using (XLWorkbook workbook = new XLWorkbook(ms))
 									{
-										workbook.Worksheets.Delete("Report Details");
+										if (workbook.Worksheets.Any(sheet => sheet.Name == "Report Details"))
+										{
+											workbook.Worksheets.Delete("Report Details");
+										}
+										workbook.SaveAs(GetUniqueFileName(TypedAttachment.FileName));
 									}
-									workbook.SaveAs(GetUniqueFileName(TypedAttachment.FileName));
 								}
 							}
 						}
