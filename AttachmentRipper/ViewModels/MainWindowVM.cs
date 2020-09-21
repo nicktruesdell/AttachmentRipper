@@ -74,11 +74,15 @@ namespace AttachmentRipper.ViewModels
 											workbook.Worksheets.Delete("Report Details");
 										}
 										workbook.SaveAs(GetUniqueFileName(TypedAttachment.FileName));
+										//workbook.Save();
+
 									}
 								}
 							}
-							TypedAttachment.Dispose();
 						}
+						GC.Collect();
+						GC.WaitForPendingFinalizers();
+						GC.Collect();
 					}
 				}
 			}
