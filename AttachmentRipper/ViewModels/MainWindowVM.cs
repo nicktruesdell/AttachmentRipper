@@ -53,7 +53,7 @@ namespace AttachmentRipper.ViewModels
 				return;
 			}
 			Regex EmailRegex = new Regex("^.*msg$");
-			Regex ExcelRegex = new Regex("^.*xlsx$");
+			Regex ExcelRegex = new Regex("^.*(xls[xm])$");
 			foreach (string MessagePath in Directory.GetFiles(SourceDirectory).Where(x => EmailRegex.IsMatch(x)))
 			{
 				var Message = new Storage.Message(MessagePath);
@@ -68,13 +68,12 @@ namespace AttachmentRipper.ViewModels
 							{
 								using (XLWorkbook workbook = new XLWorkbook(ms))
 								{
-									workbook.Worksheets.Delete("Report Details");
+									if (workbook.Worksheets.Any(sheet => sheet.Name == "Report Details"))
+									{
+										workbook.Worksheets.Delete("Report Details");
+									}
 									workbook.SaveAs(GetUniqueFileName(TypedAttachment.FileName));
 								}
-								//using (FileStream fs = File.Create(GetUniqueFileName(TypedAttachment.FileName)))
-								//{
-								//    fs.Write(TypedAttachment.Data, 0, TypedAttachment.Data.Length);
-								//}
 							}
 						}
 					}
