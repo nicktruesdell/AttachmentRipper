@@ -62,7 +62,7 @@ namespace AttachmentRipper.ViewModels
 					{
 						if (Attachment is Storage.Attachment)
 						{
-							var TypedAttachment = Attachment as Storage.Attachment;
+							var TypedAttachment = (Storage.Attachment)Attachment;
 							if (ExcelRegex.IsMatch(TypedAttachment.FileName))
 							{
 								using (MemoryStream ms = new MemoryStream(TypedAttachment.Data))
@@ -77,6 +77,7 @@ namespace AttachmentRipper.ViewModels
 									}
 								}
 							}
+							TypedAttachment.Dispose();
 						}
 					}
 				}
